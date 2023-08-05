@@ -13,7 +13,12 @@ hence the use of pure JavaScript with no dependencies, the Web Audio Api, and HT
 In order to keep the code clean, I separated into es6-modules, which unfortunately means that I needed to add a `build` step, using
 `rollup` and `swc`.
 
-In order to run the app, download or `clone` the project, run the command ```npm run build```, and then, 
+In order to run the app, download or `clone` the project, run the commands: 
+```
+npm install
+npm run build
+```
+, and then, 
 open up `index.html` with a web browser of your choice. (The audio might have some glitches when a note finishes on the FireFox browser)
 
 ## TODO
