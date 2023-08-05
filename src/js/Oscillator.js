@@ -47,10 +47,8 @@ export default class Oscillator {
 
       this.oscillatorNode.type = this.type;
 
-      this.oscillatorNode.frequency.setValueAtTime(
-        this.baseFreq * Math.pow(2, this.detune / 12), // Detune in semitones
-        currentTime,
-      );
+      this.oscillatorNode.frequency.setValueAtTime(this.baseFreq, currentTime);
+      this.oscillatorNode.detune.setValueAtTime(this.detune, currentTime);
 
       this.oscillatorNode.connect(this.gainNode);
       this.gainNode.connect(this.gameCtx.audioCtx.destination);
@@ -62,9 +60,6 @@ export default class Oscillator {
       const scaledGain = this.gameCtx._nActiveSounds === 0
         ? this.gainValue
         : this.gainValue / this.gameCtx._nActiveSounds;
-      // this.gainNode.gain.setValueAtTime(scaledGain, this.audioCtx.currentTime);
-      //
-      //
 
       // Apply an ADSR envelope to the gain node
 
