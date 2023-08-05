@@ -1,128 +1,106 @@
 export default class Oscillator {
-  constructor(params) {
-    this.gameInstance = params.gameInstance; // Reference to the game instance
-    this.audioCtx = params.audioCtx;
+  constructor(gameCtx, params) {
+    this.gameCtx = gameCtx;
     this.type = params.type;
-    this.freq = params.freq;
+    this.baseFreq = params.baseFreq;
     this.gainValue = params.gain;
+    this.A = params.adsr[0];
+    this.D = params.adsr[1];
+    this.S = params.adsr[2];
+    this.R = params.adsr[3];
+    this.detune = params.detune;
 
-    this.harmonicGain = 0.3; // as a percentage
-    this.harmonicDetune = 0.5; // Detune in semitones
+    this.oscillatorNode = null;
+    this.gainNode = null;
 
-    this.oscillator = null;
-    this.triangleOscillator = null;
-
-    this.isStopped = true;
+    this._isStopped = true;
   }
 
-  stop() {
-    if (!this.isStopped) {
-      this.isStopped = true;
+  stop(currentTime) {
+    if (!this._isStopped) {
+      this._isStopped = true;
 
       // Set the gain to 0 immediately to stop the sound
-      this.gainNode.gain.cancelScheduledValues(this.audioCtx.currentTime);
-      this.gainNode.gain.setValueAtTime(0, this.audioCtx.currentTime);
+      this.gainNode.gain.cancelScheduledValues(currentTime);
+      this.gainNode.gain.setValueAtTime(0, currentTime);
 
       // Stop the oscillator immediately
-      this.oscillator.stop(this.audioCtx.currentTime);
+      this.oscillatorNode.stop(currentTime);
 
       // Schedule the cleanup after the release has finished
-      this.oscillator.onended = () => {
-        this.oscillator.disconnect();
+      this.oscillatorNode.onended = () => {
+        this.oscillatorNode.disconnect();
         this.gainNode.disconnect();
-        this.oscillator = null;
+        this.oscillatorNode = null;
         this.gainNode = null;
-        this.gameInstance.decrementActiveOscillators();
+        this.gameCtx.decrActiveSoundsCounterCallback();
       };
     }
   }
 
-  playNote(durationInSeconds = 0.65) {
-    if (this.isStopped) {
-      this.isStopped = false;
+  playNote(currentTime, durationInSecs = 0.65) {
+    if (this._isStopped) {
+      this._isStopped = false;
 
-      this.oscillator = this.audioCtx.createOscillator();
-      this.gainNode = this.audioCtx.createGain();
+      this.oscillatorNode = this.gameCtx.audioCtx.createOscillator();
+      this.gainNode = this.gameCtx.audioCtx.createGain();
 
-      this.oscillator.type = this.type;
-      this.oscillator.frequency.setValueAtTime(
-        this.freq,
-        this.audioCtx.currentTime,
+      this.oscillatorNode.type = this.type;
+
+      this.oscillatorNode.frequency.setValueAtTime(
+        this.baseFreq * Math.pow(2, this.detune / 12), // Detune in semitones
+        currentTime,
       );
 
-      this.oscillator.connect(this.gainNode);
-      this.gainNode.connect(this.audioCtx.destination);
-
-      // Create the triangle  oscillator
-      this.triangleOscillator = this.audioCtx.createOscillator();
-      this.triangleGainNode = this.audioCtx.createGain();
-      this.triangleOscillator.type = "triangle";
-      this.triangleOscillator.frequency.setValueAtTime(
-        this.freq * Math.pow(2, this.harmonicDetune / 12), // Detune in semitones
-        this.audioCtx.currentTime,
-      );
-      this.triangleOscillator.connect(this.triangleGainNode);
-      this.triangleGainNode.connect(this.gainNode);
+      this.oscillatorNode.connect(this.gainNode);
+      this.gainNode.connect(this.gameCtx.audioCtx.destination);
 
       // Increment the active oscillators count in the Game class
-      this.gameInstance.incrementActiveOscillators();
-
-      const currentTime = this.audioCtx.currentTime;
+      this.gameCtx.incrActiveSoundsCounterCallback();
 
       // Scale down the gain based on the total number of active oscillators
-      const scaledGain = this.gameInstance.activeOscillators === 0
+      const scaledGain = this.gameCtx._nActiveSounds === 0
         ? this.gainValue
-        : this.gainValue / this.gameInstance.activeOscillators;
+        : this.gainValue / this.gameCtx._nActiveSounds;
       // this.gainNode.gain.setValueAtTime(scaledGain, this.audioCtx.currentTime);
       //
       //
 
       // Apply an ADSR envelope to the gain node
-      const attackTime = 0.02; // in seconds
-      const decayTime = 0.25; // in seconds
-      const sustainLevel = 0.5; // between 0 and 1
-      const releaseTime = 0.2; // in seconds
 
       this.gainNode.gain.setValueAtTime(0, currentTime);
       this.gainNode.gain.linearRampToValueAtTime(
-        this.gainValue,
-        currentTime + attackTime,
+        scaledGain * this.detune,
+        currentTime + this.A,
       );
       this.gainNode.gain.linearRampToValueAtTime(
-        sustainLevel * this.gainValue,
-        currentTime + attackTime + decayTime,
-      );
-
-      this.triangleGainNode.gain.setValueAtTime(
-        this.gainValue * this.harmonicGain,
-        this.audioCtx.currentTime,
+        this.S * scaledGain,
+        currentTime + this.A + this.D,
       );
 
       // Start the oscillator
-      this.oscillator.start();
+      this.oscillatorNode.start();
 
       // Apply exponential ramp to smoothly decrease volume and create a fade-out effect
       const fadeOutDuration = 0.015; // Adjust this value for the desired fade-out duration
 
       // Stop the oscillator after the specified duration
-      this.oscillator.stop(
-        this.audioCtx.currentTime + durationInSeconds + fadeOutDuration,
-      );
+      this.oscillatorNode.stop(currentTime + durationInSecs + fadeOutDuration);
       this.gainNode.gain.linearRampToValueAtTime(
         0,
-        currentTime + durationInSeconds + fadeOutDuration + releaseTime,
+        currentTime + durationInSecs + fadeOutDuration + this.R,
       );
 
       // Schedule the cleanup after the release has finished
-      this.oscillator.onended = () => {
-        this.oscillator.disconnect();
+      this.oscillatorNode.onended = () => {
+        this.oscillatorNode.disconnect();
         this.gainNode.disconnect();
-        this.oscillator = null;
+        this.oscillatorNode = null;
         this.gainNode = null;
-        this.isStopped = true;
+        this._isStopped = true;
 
         // Decrement the active oscillators count in the Game class
-        this.gameInstance.decrementActiveOscillators();
+        this.gameCtx.decrActiveSoundsCounterCallback();
       };
     }
   }
