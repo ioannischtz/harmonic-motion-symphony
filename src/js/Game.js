@@ -1,61 +1,98 @@
 import Pendulum from "./Pendulum";
 
 export default class Game {
-  constructor(canvasId, audioCtx) {
-    this.canvas = document.getElementById(canvasId);
+  constructor(canvasParams, audioCtx, fpsCap, simCoeffs) {
+    this.canvas = document.getElementById(canvasParams.canvasId);
     this.canvasCtx = this.canvas.getContext("2d");
     this.audioCtx = audioCtx;
-    this.canvas.width = window.innerWidth - 32;
-    this.canvas.height = window.innerHeight - 32;
-    this.frameRateCap = 240;
+    this.canvas.width = canvasParams.width;
+    this.canvas.height = canvasParams.height;
+    this.simCoeffs = simCoeffs;
+    this.fpsCap = fpsCap;
     this.pendulums = [];
-    this.isPaused = false;
-    this.selectedPendulum = null;
-
-    this.activeOscillators = 0;
-    this.activeOscillatorsLock = Promise.resolve(); // Initialize with a resolved Promise (no lock)
-
+    this.GAME_STATES = {
+      MENU: "MENU",
+      PLAYING: "PLAYING",
+      PAUSED: "PAUSED",
+      SETTINGS: "SETTINGS",
+    };
+    this.gameState = this.GAME_STATES.MENU;
     // Set the origin-point to the top center of the canvas for simplicity
     this.originPoint = { x: this.canvas.width / 2, y: 100 };
 
-    this.addPendulum(
-      this,
-      this.originPoint.x + 400,
-      this.originPoint.y + 10,
-      1000,
-      50,
-      {
-        audioCtx: this.audioCtx,
-        type: "sine",
-        freq: 440,
-        gain: 1.0,
-      },
-    );
+    this.selectedPendulum = null;
+
+    this._nActiveSounds = 0;
+    this._nActiveSoundsLock = Promise.resolve(); // Initialize with a resolved Promise (no lock)
 
     // Setup event listeners for user interactions
-    this.setupEventListeners();
+    this._setupEventListeners();
 
     // Start the game-loop
-    this.gameLoop();
+    this._loop();
   }
 
-  async incrementActiveOscillators() {
-    // Use async/await to ensure synchronization
-    await this.activeOscillatorsLock;
-    this.activeOscillators++;
-    this.activeOscillatorsLock = Promise.resolve(); // Release the lock
+  getGameCtx() {
+    // Game Context:
+    const gameCtx = {
+      canvasCtx: this.canvasCtx,
+      audioCtx: this.audioCtx,
+      originPoint: this.originPoint,
+      simCoeffs: this.simCoeffs,
+      _nActiveSounds: this._nActiveSounds,
+      incrActiveSoundsCounterCallback: this._incrementActiveSounds,
+      decrActiveSoundsCounterCallback: this._decrementActiveSounds,
+    };
+    return gameCtx;
   }
 
-  async decrementActiveOscillators() {
+  play() {
+    this.gameState = this.GAME_STATES.PLAYING;
+  }
+
+  pause() {
+    this.gameState = this.GAME_STATES.PAUSED;
+  }
+
+  reset() {
+    this.fpsCap = 60;
+    this.pendulums.forEach((pendulum) => pendulum.audioSource.stop());
+    this.pendulums = null;
+    this.simCoeffs = {
+      gAccel: 0.00015,
+      dampingCoeff: 0.00005,
+    };
+    this._nActiveSounds = 0;
+    this._nActiveSoundsLock = Promise.resolve();
+  }
+
+  openMenu() {
+    this.gameState = this.GAME_STATES.MENU;
+  }
+
+  openSettings() {
+    this.gameState = this.GAME_STATES.SETTINGS;
+  }
+
+  async _incrementActiveSounds() {
     // Use async/await to ensure synchronization
-    await this.activeOscillatorsLock;
-    this.activeOscillators--;
+    await this._nActiveSoundsLock;
+    console.info("_increment");
+    this._nActiveSounds++;
+    this._nActiveSoundsLock = Promise.resolve(); // Release the lock
+  }
+
+  async _decrementActiveSounds() {
+    // Use async/await to ensure synchronization
+    await this._nActiveSoundsLock;
+    console.info("_decrement");
+    this._nActiveSounds--;
     // Ensure the count doesn't go negative
-    this.activeOscillators = Math.max(0, this.activeOscillators);
-    this.activeOscillatorsLock = Promise.resolve(); // Release the lock
+    this._nActiveSounds = Math.max(0, this._nActiveSounds);
+    this._nActiveSoundsLock = Promise.resolve(); // Release the lock
   }
 
-  setupEventListeners() {
+  _setupEventListeners() {
     // Add event listeners for user interactions
     //
     // Implement logic to handle pendulum selection:
@@ -69,34 +106,30 @@ export default class Game {
     //   `RESET`
   }
 
-  addPendulum(gameInstance, x, y, weight, radius, oscillatorParams) {
-    console.group("addPendulum");
-    console.info("Params: ", x, y, weight, radius, oscillatorParams);
-    console.groupEnd();
+  addPendulum(coords, weight, radius, oscillatorsParams) {
+    // Game Context:
+    const gameCtx = this.getGameCtx();
     // Create a new pendulum and add it to the game's pendulums array
     const pendulum = new Pendulum(
-      gameInstance,
-      this.canvasCtx,
-      x,
-      y,
-      this.originPoint,
+      gameCtx,
+      coords,
       weight,
       radius,
-      oscillatorParams,
+      oscillatorsParams,
     );
     this.pendulums.push(pendulum);
   }
 
-  update(dt) {
+  _update(dt) {
     // Update the game state based on the elapsed delta time (dt)
-    if (!this.isPaused) {
+    if (this.gameState === this.GAME_STATES.PLAYING) {
       this.pendulums.forEach((pendulum) => {
         pendulum.update(dt);
       });
     }
   }
 
-  render() {
+  _render() {
     // Clear the canvas and draw the pendulums
     this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -107,14 +140,12 @@ export default class Game {
     });
   }
 
-  gameLoop() {
+  _loop() {
     let then = performance.now();
-    const interval = 1000 / this.frameRateCap;
+    const interval = 1000 / this.fpsCap;
     let delta = 0;
 
-    console.group("GAME LOOP");
-    console.info("...playing");
-    console.groupEnd();
+    this.play();
 
     const updateAndRender = (now) => {
       requestAnimationFrame(updateAndRender);
@@ -125,8 +156,8 @@ export default class Game {
         then = now - (delta % interval);
 
         // Update and render the game
-        this.update(delta);
-        this.render();
+        this._update(delta);
+        this._render();
       }
     };
 

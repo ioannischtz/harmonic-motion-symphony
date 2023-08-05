@@ -5,7 +5,7 @@ export default class AudioSource {
     this.gameCtx = gameCtx;
     this.oscParamsArray = oscParamsArray;
     this.oscillators = [];
-    this._isStopped = true;
+    // this._isStopped = true;
 
     this.oscParamsArray.forEach((oscParams) => {
       this.addOscillator(oscParams);
@@ -28,13 +28,17 @@ export default class AudioSource {
     }
   }
 
-  playNote() {
-    if (this._isStopped) {
+  playNote(durationInSecs) {
+    console.info("AudioSource.playNote");
+    console.info("AudioSource._isStopped", this._isStopped);
+    if (true) {
       this._isStopped = false;
       this.oscillators.forEach((osc) => {
         // !! Maybe we will need to pass a specific time,
         // for synchronization
-        osc.playNote(this.gameCtx.audioCtx.currentTime, durationInSecs);
+        const currentTime = this.gameCtx.audioCtx.currentTime;
+        console.info("currentTime = ", currentTime);
+        osc.playNote(currentTime, durationInSecs);
       });
     }
   }

@@ -60,12 +60,15 @@ export default class Oscillator {
       const scaledGain = this.gameCtx._nActiveSounds === 0
         ? this.gainValue
         : this.gainValue / this.gameCtx._nActiveSounds;
+      console.info("this.gainValue = ", this.gainValue);
+      console.info("scaledGain = ", scaledGain);
+      console.info("_nActiveSounds = ", this.gameCtx._nActiveSounds);
 
       // Apply an ADSR envelope to the gain node
 
       this.gainNode.gain.setValueAtTime(0, currentTime);
       this.gainNode.gain.linearRampToValueAtTime(
-        scaledGain * this.detune,
+        scaledGain,
         currentTime + this.A,
       );
       this.gainNode.gain.linearRampToValueAtTime(
