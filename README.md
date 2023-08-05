@@ -33,7 +33,7 @@ open up `index.html` with a web browser of your choice. (The audio might have so
     - [ ] Change properties of the pendulum
     - [ ] Add/Remove pendulums
     - [ ] Drag a pendulum while the simulation is running
-- [ ] Implement the `AudioSource` class:
+- [x] Implement the `AudioSource` class:
       - host multiple oscillators,
       - add ADSR envelop
       - add detuning 
