@@ -6,31 +6,14 @@ function mapRange(value, inputMin, inputMax, outputMin, outputMax) {
 }
 
 class Oscillator {
-  constructor(
-    params = {
-      audioCtx,
-      type: "sine",
-      freq: 440,
-      gain: 0.5,
-    },
-  ) {
+  constructor(params) {
+    this.gameInstance = params.gameInstance; // Reference to the game instance
     this.audioCtx = params.audioCtx;
     this.type = params.type;
     this.freq = params.freq;
     this.gainValue = params.gain;
 
     this.oscillator = null;
-    // this.oscillator = this.audioCtx.createOscillator();
-    // this.gainNode = this.audioCtx.createGain();
-    //
-    // this.oscillator.type = this.type;
-    // this.oscillator.frequency.setValueAtTime(
-    //   this.freq,
-    //   this.audioCtx.currentTime,
-    // );
-    //
-    // this.oscillator.connect(this.gainNode);
-    // this.gainNode.connect(this.audioCtx.destination);
 
     this.isStopped = true;
   }
@@ -52,6 +35,7 @@ class Oscillator {
         this.gainNode.disconnect();
         this.oscillator = null;
         this.gainNode = null;
+        this.gameInstance.decrementActiveOscillators();
       };
     }
   }
@@ -72,11 +56,14 @@ class Oscillator {
       this.oscillator.connect(this.gainNode);
       this.gainNode.connect(this.audioCtx.destination);
 
-      // this.gainNode.gain.setTargetAtTime(
-      //   this.gainValue,
-      //   this.audioCtx.currentTime,
-      //   0.015,
-      // );
+      // Increment the active oscillators count in the Game class
+      this.gameInstance.incrementActiveOscillators();
+
+      // Scale down the gain based on the total number of active oscillators
+      const scaledGain = this.gameInstance.activeOscillators === 0
+        ? this.gainValue
+        : this.gainValue / this.gameInstance.activeOscillators;
+      this.gainNode.gain.setValueAtTime(scaledGain, this.audioCtx.currentTime);
 
       // Start the oscillator
       this.oscillator.start();
@@ -101,6 +88,9 @@ class Oscillator {
         this.oscillator = null;
         this.gainNode = null;
         this.isStopped = true;
+
+        // Decrement the active oscillators count in the Game class
+        this.gameInstance.decrementActiveOscillators();
       };
     }
   }
@@ -114,6 +104,7 @@ class Oscillator {
 // }
 class Pendulum {
   constructor(
+    gameInstance,
     canvasCtx,
     x,
     y,
@@ -122,6 +113,7 @@ class Pendulum {
     radius = 5,
     oscillatorParams,
   ) {
+    this.gameInstance = gameInstance;
     this.canvasCtx = canvasCtx;
     this.x = x;
     this.y = y;
@@ -141,6 +133,7 @@ class Pendulum {
     console.group("Pendulum constructor:");
     console.info("oscillatorParams", oscillatorParams);
 
+    oscillatorParams.gameInstance = this.gameInstance;
     oscillatorParams.freq = mapRange(this.weight, 1, 10000, 80, 800);
 
     this.audioSource = new Oscillator(oscillatorParams);
@@ -261,10 +254,14 @@ class Game {
     this.isPaused = false;
     this.selectedPendulum = null;
 
+    this.activeOscillators = 0;
+    this.activeOscillatorsLock = Promise.resolve(); // Initialize with a resolved Promise (no lock)
+
     // Set the origin-point to the top center of the canvas for simplicity
     this.originPoint = { x: this.canvas.width / 2, y: 100 };
 
     this.addPendulum(
+      this,
       this.originPoint.x + 400,
       this.originPoint.y + 10,
       1000,
@@ -273,7 +270,7 @@ class Game {
         audioCtx: this.audioCtx,
         type: "sine",
         freq: 440,
-        gain: 0.5,
+        gain: 1.0,
       },
     );
 
@@ -282,6 +279,22 @@ class Game {
 
     // Start the game-loop
     this.gameLoop();
+  }
+
+  async incrementActiveOscillators() {
+    // Use async/await to ensure synchronization
+    await this.activeOscillatorsLock;
+    this.activeOscillators++;
+    this.activeOscillatorsLock = Promise.resolve(); // Release the lock
+  }
+
+  async decrementActiveOscillators() {
+    // Use async/await to ensure synchronization
+    await this.activeOscillatorsLock;
+    this.activeOscillators--;
+    // Ensure the count doesn't go negative
+    this.activeOscillators = Math.max(0, this.activeOscillators);
+    this.activeOscillatorsLock = Promise.resolve(); // Release the lock
   }
 
   setupEventListeners() {
@@ -298,12 +311,13 @@ class Game {
     //   `RESET`
   }
 
-  addPendulum(x, y, weight, radius, oscillatorParams) {
+  addPendulum(gameInstance, x, y, weight, radius, oscillatorParams) {
     console.group("addPendulum");
     console.info("Params: ", x, y, weight, radius, oscillatorParams);
     console.groupEnd();
     // Create a new pendulum and add it to the game's pendulums array
     const pendulum = new Pendulum(
+      gameInstance,
       this.canvasCtx,
       x,
       y,
@@ -413,10 +427,12 @@ function main() {
     const canvasId = "canvas";
     const game = new Game(canvasId, audioCtx);
 
+    // const oscillatorTypes = ["sine"];
     const oscillatorTypes = ["sine", "square", "sawtooth", "triangle"];
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < getRandomInt(15); i++) {
       game.addPendulum(
+        game,
         game.originPoint.x + getRandomInt(600),
         game.originPoint.y + getRandomInt(600),
         getRandomInt(10000),
@@ -424,7 +440,7 @@ function main() {
         {
           audioCtx: game.audioCtx,
           type: getRandomElementFromArray(oscillatorTypes),
-          gain: 0.5,
+          gain: 1.0,
         },
       );
     }
