@@ -24,8 +24,8 @@ open up `index.html` with a web browser of your choice. (The audio might have so
 ## TODO
 - [x] Create a functional prototype
 - [ ] Implement a game menu
-    - [ ] PLAY
-    - [ ] PAUSE
+    - [ ] NEW GAME
+    - [x] RESUME
     - [ ] RESET
     - [ ] SETTINGS
 - [ ] Add user interactivity
