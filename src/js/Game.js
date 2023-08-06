@@ -71,7 +71,6 @@ export default class Game {
     };
     this._nActiveSounds = 0;
     this._nActiveSoundsLock = Promise.resolve();
-    this.gameState.prev = this.gameState.curr;
   }
 
   openMenu() {

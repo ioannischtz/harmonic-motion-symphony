@@ -39,6 +39,15 @@ function main() {
   // We cannot supply an audioCtx without user interaction. audioCtx will be set later, on user click
   const game = new Game(canvasParams, null, fpsCap, simCoeffs);
 
+  function resume(game) {
+    menuOverlay.style.display = "none";
+    if (game.gameState.prev === game.GAME_STATES.PLAYING) {
+      game.play();
+    } else if (game.gameState.prev === game.GAME_STATES.EDITING) {
+      game.edit();
+    }
+  }
+
   // Function to update the keys-hint content
   function updateKeysHint(gameState, GAME_STATES) {
     const keysHint = document.getElementById("keysHint");
@@ -139,15 +148,13 @@ function main() {
   });
 
   resumeBtn.addEventListener("click", () => {
-    menuOverlay.style.display = "none";
-    if (game.gameState.prev === game.GAME_STATES.PLAYING) {
-      game.play();
-    } else if (game.gameState.prev === game.GAME_STATES.EDITING) {
-      game.edit();
-    }
+    resume(game);
   });
 
-  resetButton.addEventListener("click", () => game.reset());
+  resetButton.addEventListener("click", () => {
+    game.reset();
+    resume(game);
+  });
 
   settingsButton.addEventListener("click", () => game.openSettings());
 }
