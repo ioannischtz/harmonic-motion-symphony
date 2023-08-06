@@ -57,6 +57,8 @@ export const baseFrequencies = {
   B4: 493.88,
 };
 
+export const oscillatorTypes = ["sine", "triangle", "square", "sawtooth"];
+
 export function mapRangeInverse(
   value,
   inputMin,

@@ -1,4 +1,5 @@
 import Pendulum from "./Pendulum";
+import { baseFrequencies } from "./utils";
 
 export default class Game {
   constructor(canvasParams, audioCtx, fpsCap, simCoeffs) {
@@ -49,6 +50,38 @@ export default class Game {
       gameState: this.gameState,
     };
     return gameCtx;
+  }
+
+  newGame() {
+    this.reset();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    this.audioCtx = audioCtx;
+
+    const nPendulums = 1;
+    const oscillatorTypes = ["sine", "square", "sawtooth", "triangle"];
+    const oscillatorsParams = [
+      {
+        type: oscillatorTypes[0],
+        gain: 0.7,
+        baseFreq: baseFrequencies["A2"],
+        adsr: [0.05, 0.05, 0.2, 0.1],
+        detune: 0,
+      },
+    ];
+
+    for (let i = 0; i < nPendulums; i++) {
+      this.addPendulum(
+        {
+          x: this.originPoint.x,
+          y: this.originPoint.y + 400,
+        },
+        1000,
+        25,
+        oscillatorsParams,
+      );
+    }
+
+    this.edit();
   }
 
   play() {
@@ -127,6 +160,14 @@ export default class Game {
       oscillatorsParams,
     );
     this.pendulums.push(pendulum);
+  }
+
+  removePendulum() {
+    const removedPendulum = this.pendulums.splice(
+      this.selectedPendulum,
+      this.selectedPendulum,
+    );
+    removedPendulum[0].audioSource.stop();
   }
 
   _update(dt) {

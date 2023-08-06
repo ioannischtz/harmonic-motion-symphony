@@ -96,7 +96,7 @@ export default class Pendulum {
     const alpha =
       -((this.gameCtx.simCoeffs.gAccel / this.length) * Math.sin(this.angle)) -
       (this.gameCtx.simCoeffs.dampingCoeff / this.weight) *
-        this._angularVelocity;
+      this._angularVelocity;
 
     // Update the angular velocity and angle
     this._angularVelocity += alpha * dt;
@@ -137,7 +137,7 @@ export default class Pendulum {
       { x: this.coords.x, y: this.coords.y },
       this.radius,
       this.weightColor,
-      2,
+      6,
     );
   }
 }

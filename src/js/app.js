@@ -1,9 +1,5 @@
 import Game from "./Game";
-import {
-  baseFrequencies,
-  getRandomElementFromArray,
-  getRandomInt,
-} from "./utils";
+import { baseFrequencies, oscillatorTypes } from "./utils";
 
 function main() {
   console.info("DOM loaded");
@@ -20,7 +16,7 @@ function main() {
     dampingCoeff: 0.00005,
   };
   // Get the elements
-  const playBtn = document.getElementById("play-button");
+  const newGameBtn = document.getElementById("new-game-button");
   const resumeBtn = document.getElementById("resume-button");
   const resetButton = document.getElementById("reset-button");
   const settingsButton = document.getElementById("settings-button");
@@ -29,12 +25,62 @@ function main() {
   const editingOverlay = document.getElementById("editingOverlay");
   const playingOverlay = document.getElementById("playingOverlay");
   const keysHintOverlay = document.getElementById("keysHintOverlay");
+  const audioSourceGui = document.getElementById("audioSourceGui");
+  const weightInput = document.getElementById("weightInput");
+  const radiusInput = document.getElementById("radiusInput");
+  const coordX = document.getElementById("xCoordinateInput");
+  const coordY = document.getElementById("yCoordinateInput");
+  const typeSelect = document.getElementById("typeSelect");
+  const baseFrequencySelect = document.getElementById("baseFrequencySelect");
+  const gainInput = document.getElementById("gainInput");
+  const aInput = document.getElementById("aInput");
+  const dInput = document.getElementById("dInput");
+  const sInput = document.getElementById("sInput");
+  const rInput = document.getElementById("rInput");
+  const detuneInput = document.getElementById("detuneInput");
+  const addOscillatorButton = document.getElementById("addOscillatorButton");
+  const oscillatorCountLabel = document.getElementById("oscillatorCountLabel");
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabContents = document.querySelectorAll(".tab-content");
+  const addPendulumBtn = document.getElementById("add-pendulum-button");
 
   menuOverlay.style.display = "flex";
   editingOverlay.style.display = "none";
   playingOverlay.style.display = "none";
   keysHintOverlay.style.display = "flex";
   resumeBtn.style.display = "none";
+
+  // JavaScript for tab-menu functionality
+
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const tabName = button.dataset.tab;
+
+      tabButtons.forEach((btn) => btn.classList.remove("active"));
+      tabContents.forEach((content) => content.classList.remove("active"));
+
+      button.classList.add("active");
+      document.getElementById(tabName).classList.add("active");
+    });
+  });
+
+  const oscillatorsParams = [];
+
+  // Dynamically populate the baseFrequencySelect options from the baseFrequencies object
+  for (const note in baseFrequencies) {
+    const option = document.createElement("option");
+    option.value = baseFrequencies[note];
+    option.text = note;
+    baseFrequencySelect.appendChild(option);
+  }
+
+  // Dynamically populate the type options from the oscillatorTypes
+  for (const oscType of oscillatorTypes) {
+    const option = document.createElement("option");
+    option.value = oscillatorTypes[oscType];
+    option.text = oscType;
+    typeSelect.appendChild(option);
+  }
 
   // We cannot supply an audioCtx without user interaction. audioCtx will be set later, on user click
   const game = new Game(canvasParams, null, fpsCap, simCoeffs);
@@ -52,12 +98,10 @@ function main() {
   function updateKeysHint(gameState, GAME_STATES) {
     const keysHint = document.getElementById("keysHint");
     keysHint.innerHTML = `
-    <p><strong>ESC</strong> ${
-      gameState.curr === GAME_STATES.MENU ? "close" : "open"
-    } the menu</p>
-    <p><strong>SPACE</strong> switch to ${
-      gameState.curr === GAME_STATES.EDITING ? "playing" : "editing"
-    } mode</p>
+    <p><kbd>Esc</kbd> ${gameState.curr === GAME_STATES.MENU ? "close" : "open"
+      } the menu</p>
+    <p><kbd>Space</kbd> switch to ${gameState.curr === GAME_STATES.EDITING ? "playing" : "editing"
+      } mode</p>
   `;
   }
 
@@ -97,54 +141,74 @@ function main() {
     updateKeysHint(game.gameState, game.GAME_STATES);
   }
 
+  function handleCanvasClick(event) {
+    console.info("Canvas Clicked");
+    const canvasRect = canvas.getBoundingClientRect();
+    const offsetX = event.clientX - canvasRect.left;
+    const offsetY = event.clientY - canvasRect.top;
+
+    // Now you have the coordinates offsetX and offsetY
+    // You can use these values to update the input fields for x and y coordinates
+    const xCoordinateInput = document.getElementById("xCoordinateInput");
+    const yCoordinateInput = document.getElementById("yCoordinateInput");
+
+    // Set the input values based on the click coordinates
+    xCoordinateInput.value = offsetX;
+    yCoordinateInput.value = offsetY;
+  }
+
+  function handleAddOscillatorBtnClick() {
+    const A = parseFloat(aInput.value);
+    const D = parseFloat(dInput.value);
+    const S = parseFloat(sInput.value);
+    const R = parseFloat(rInput.value);
+    const adsr = [A, D, S, R];
+    const oscillatorParams = {
+      type: typeSelect.value,
+      baseFrequency: parseFloat(baseFrequencySelect.value),
+      gain: parseFloat(gainInput.value),
+      adsr,
+      detune: parseInt(detuneInput.value),
+    };
+
+    // Store the oscillatorParams object in the oscillatorsParams array
+    oscillatorsParams.push(oscillatorParams);
+
+    // Update the oscillatorCountLabel to show the number of oscillators added
+    oscillatorCountLabel.textContent =
+      `Number of Oscillators: ${oscillatorsParams.length}`;
+  }
+
+  function handleAddPendulumBtnClick() {
+    const weightValue = parseInt(weightInput.value);
+    const radiusValue = parseInt(radiusInput.value);
+    const coordXval = parseInt(coordX.value);
+    const coordYval = parseInt(coordY.value);
+    game.addPendulum(
+      { x: coordXval, y: coordYval },
+      weightValue,
+      radiusValue,
+      oscillatorsParams,
+    );
+  }
+
   // Initial update to set the keys-hint
   updateKeysHint(game.gameState, game.GAME_STATES);
 
   document.addEventListener("keydown", handleKeyPress);
 
-  playBtn.addEventListener("click", () => {
-    playBtn.style.display = "none";
+  canvas.addEventListener("click", handleCanvasClick);
+
+  newGameBtn.addEventListener("click", () => {
+    newGameBtn.style.display = "none";
     resumeBtn.style.display = "block";
-    // Create the AudioContext after a user interaction, in order to comform
-    // to the Autoplay policy
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    game.audioCtx = audioCtx;
 
-    // const oscillatorTypes = ["sine"];
-    const oscillatorTypes = ["sine", "square", "sawtooth", "triangle"];
-    const oscillatorsParams = [
-      {
-        type: getRandomElementFromArray(oscillatorTypes),
-        gain: 0.7,
-        baseFreq: baseFrequencies["A2"],
-        adsr: [0.05, 0.05, 0.2, 0.1],
-        detune: 0,
-      },
-      {
-        type: getRandomElementFromArray(oscillatorTypes),
-        gain: 0.3,
-        baseFreq: baseFrequencies["A2"],
-        adsr: [0.05, 0.05, 0.2, 0.1],
-        detune: 100, // 100 cents = 1 semitone
-      },
-    ];
-
-    for (let i = 0; i < 1; i++) {
-      game.addPendulum(
-        {
-          x: game.originPoint.x + getRandomInt(600),
-          y: game.originPoint.y + getRandomInt(600),
-        },
-        getRandomInt(10000),
-        getRandomInt(100),
-        oscillatorsParams,
-      );
-    }
     // hide the game menu
     menuOverlay.style.display = "none";
-    editingOverlay.style.display = "none";
-    playingOverlay.style.display = "flex";
-    game.play();
+    editingOverlay.style.display = "flex";
+    playingOverlay.style.display = "none";
+
+    game.newGame();
   });
 
   resumeBtn.addEventListener("click", () => {
@@ -157,6 +221,9 @@ function main() {
   });
 
   settingsButton.addEventListener("click", () => game.openSettings());
+
+  addOscillatorButton.addEventListener("click", handleAddOscillatorBtnClick);
+  addPendulumBtn.addEventListener("click", handleAddPendulumBtnClick);
 }
 
 if (document.readyState === "loading") {

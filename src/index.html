@@ -12,24 +12,110 @@
 <body>
     <canvas id="canvas"></canvas>
     <menu class="menu-overlay" id="menuOverlay">
-        <button type="menu" id="play-button">PLAY</button>
+        <button type="menu" id="new-game-button">NEW GAME</button>
         <button type="menu" id="resume-button">RESUME</button>
         <button type="menu" id="reset-button">RESET</button>
         <button type="menu" id="settings-button">SETTINGS</button>
     </menu>
     <div class="keys-hint-overlay" id="keysHintOverlay">
         <div class="keys-hint" id="keysHint">
-            <p><strong>ESC</strong> toggle the menu</p>
-            <p><strong>SPACE</strong> toggle between editing and playing mode</p>
+            <p><kbd>Esc</kbd> toggle the menu</p>
+            <p><kbd>Space</kbd> toggle between editing and playing mode</p>
         </div>
     </div>
     <div class="editing-overlay" id="editingOverlay">
-        <!-- Content for the editing overlay goes here -->
-        EDITING OVERLAY
+        <div class="editing-gui" id="editingOverlay">
+            <div class="tab-menu">
+                <button class="tab-button active" data-tab="addPendulumTab">
+                    Add Pendulum
+                </button>
+                <button class="tab-button" data-tab="editPendulumTab">
+                    Edit Selected Pendulum
+                </button>
+            </div>
+
+            <div class="tab-content active" id="addPendulumTab">
+                <!-- Add Pendulum GUI content goes here -->
+                <div class="add-pendulum-gui" id="addPendulumGui">
+                    <div class="input-group">
+                        <label for="weightInput">Weight:</label>
+                        <input type="number" id="weightInput" min="10" max="10000" />
+                    </div>
+                    <div class="input-group">
+                        <label for="radiusInput">Radius:</label>
+                        <input type="number" id="radiusInput" min="5" max="100" />
+                    </div>
+
+                    <label for="coordinatesInput">Coordinates:</label>
+                    <div class="coordinates-input">
+                        <input type="number" id="xCoordinateInput" />
+                        <input type="number" id="yCoordinateInput" />
+                    </div>
+                    <p class="hint">(Click on the screen to set the coordinates)</p>
+                </div>
+
+                <div class="audio-source-gui" id="audioSourceGui">
+                    <div class="row">
+                        <div class="input-group">
+                            <label for="typeSelect">Type:</label>
+                            <select id="typeSelect">
+                                <!-- ... options ... -->
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="baseFrequencySelect">Base Frequency:</label>
+                            <select id="baseFrequencySelect">
+                                <!-- ... options ... -->
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="gainInput">Gain:</label>
+                            <input type="number" id="gainInput" value="0.5" min="0.0" max="1.0" step="0.01" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-group">
+                            <label for="aInput">A:</label>
+                            <input type="number" id="aInput" value="0.1" min="0.0" max="5.0" step="0.01" />
+                        </div>
+                        <div class="input-group">
+                            <label for="dInput">D:</label>
+                            <input type="number" id="dInput" value="0.1" min="0.0" max="5.0" step="0.01" />
+                        </div>
+                        <div class="input-group">
+                            <label for="sInput">S:</label>
+                            <input type="number" id="sInput" value="0.1" min="0.0" max="5.0" step="0.01" />
+                        </div>
+                        <div class="input-group">
+                            <label for="rInput">R:</label>
+                            <input type="number" id="rInput" value="0.1" min="0.0" max="5.0" step="0.01" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-group">
+                            <label for="detuneInput">Detune (cents):</label>
+                            <input type="number" id="detuneInput" min="0" max="1200" />
+                        </div>
+                    </div>
+
+                    <!-- Add other inputs and elements below if needed -->
+
+                    <p id="oscillatorCountLabel">Number of Oscillators: 0</p>
+                    <button id="addOscillatorButton">Add Oscillator</button>
+                </div>
+
+                <button class="add-pendulum-button" id="add-pendulum-button">ADD PENDULUM</button>
+            </div>
+
+            <div class="tab-content" id="editPendulumTab">
+                <!-- Edit Selected Pendulum GUI content goes here -->
+            </div>
+        </div>
     </div>
     <div class="playing-overlay" id="playingOverlay">
-        <!-- Content for the playing overlay goes here -->
-        PLAYING OVERLAY
+        <div class="playing-gui"></div>
     </div>
 
     <script src="../dist/bundle.js"></script>
