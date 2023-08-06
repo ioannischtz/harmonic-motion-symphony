@@ -24,14 +24,15 @@ open up `index.html` with a web browser of your choice. (The audio might have so
 ## TODO
 - [x] Create a functional prototype
 - [ ] Implement a game menu
-    - [ ] NEW GAME
+    - [x] NEW GAME
     - [x] RESUME
-    - [ ] RESET
+    - [x] RESET
     - [ ] SETTINGS
 - [ ] Add user interactivity
     - [ ] Select a pendulum
     - [ ] Change properties of the pendulum
-    - [ ] Add/Remove pendulums
+    - [x] Add pendulums
+    - [ ] Remove pendulums
     - [ ] Drag a pendulum while the simulation is running
 - [x] Implement the `AudioSource` class:
       - host multiple oscillators,
