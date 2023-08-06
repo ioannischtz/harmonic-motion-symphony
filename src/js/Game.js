@@ -64,7 +64,7 @@ export default class Game {
   reset() {
     this.fpsCap = 60;
     this.pendulums.forEach((pendulum) => pendulum.audioSource.stop());
-    this.pendulums = null;
+    this.pendulums = [];
     this.simCoeffs = {
       gAccel: 0.00015,
       dampingCoeff: 0.00005,
