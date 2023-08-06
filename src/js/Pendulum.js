@@ -8,6 +8,12 @@ export default class Pendulum {
     this._prevX = coords.x;
     this._weight = 5;
     this._radius = 5;
+    this.rodColor = getComputedStyle(document.documentElement).getPropertyValue(
+      "--primary-dark",
+    );
+    this.weightColor = getComputedStyle(
+      document.documentElement,
+    ).getPropertyValue("--accent");
 
     // Use setters to apply validation for weight and radius
     this.weight = weight;
@@ -123,14 +129,14 @@ export default class Pendulum {
       this.gameCtx.canvasCtx,
       this.gameCtx.originPoint,
       { x: this.coords.x, y: this.coords.y },
-      "black",
+      this.rodColor,
       4,
     );
     drawCircle(
       this.gameCtx.canvasCtx,
       { x: this.coords.x, y: this.coords.y },
       this.radius,
-      "red",
+      this.weightColor,
       2,
     );
   }

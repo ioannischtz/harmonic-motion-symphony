@@ -1,5 +1,118 @@
+:root {
+  --primary-light: #ebebeb;
+  --primary-dark: #212d40;
+  --accent: #af9164;
+  --semantic-red: #b6465f;
+  --semantic-green: #2a7f62;
+}
+
+body {
+  overflow: hidden;
+}
+
 canvas {
-  border: 2px solid black;
-  background: whitesmoke;
+  display: block;
+  border: 2px solid var(--primary-dark);
+  background-color: var(--primary-light);
   margin: 8px;
+}
+
+.menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.025); /* Semi-transparent black overlay */
+  backdrop-filter: blur(4px); /* Apply blur effect */
+  z-index: 1; /* Ensure the menu is above the canvas */
+}
+
+.menu-overlay button[type="menu"] {
+  font-size: 48px;
+  font-weight: bold;
+  padding: 12px 24px;
+  margin: 10px;
+  background-color: transparent;
+  color: var(--semantic-green);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.menu-overlay button[type="menu"]:hover {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.2
+  ); /* Semi-transparent white background on hover */
+}
+
+.menu-overlay button[type="menu"]:focus {
+  outline: none;
+}
+
+.editing-overlay,
+.playing-overlay,
+.keys-hint-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.editing-overlay {
+  justify-content: center;
+  align-items: end;
+  flex-direction: column;
+}
+
+.playing-overlay {
+  justify-content: end;
+  align-items: center;
+  flex-direction: column;
+}
+
+.keys-hint-overlay {
+  top: 32px;
+  left: 32px;
+  z-index: 9999;
+  width: fit-content;
+  height: fit-content;
+  justify-content: start;
+  align-items: start;
+  flex-direction: column;
+}
+
+.keys-hint {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 10px;
+  border-radius: 8px;
+  display: inline-block;
+  font-size: 18px;
+}
+
+.keys-hint p:nth-child(1) {
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.keys-hint p:nth-child(2) {
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.keys-hint strong {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-right: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }

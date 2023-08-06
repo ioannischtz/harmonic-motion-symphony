@@ -13,10 +13,14 @@ export default class Game {
     this.GAME_STATES = {
       MENU: "MENU",
       PLAYING: "PLAYING",
-      PAUSED: "PAUSED",
+      EDITING: "EDITING",
       SETTINGS: "SETTINGS",
     };
-    this.gameState = this.GAME_STATES.MENU;
+    this.gameState = {
+      curr: this.GAME_STATES.MENU,
+      prev: this.GAME_STATES.MENU,
+    };
+
     // Set the origin-point to the top center of the canvas for simplicity
     this.originPoint = { x: this.canvas.width / 2, y: 100 };
 
@@ -42,16 +46,19 @@ export default class Game {
       _nActiveSounds: this._nActiveSounds,
       incrActiveSoundsCounterCallback: this._incrementActiveSounds,
       decrActiveSoundsCounterCallback: this._decrementActiveSounds,
+      gameState: this.gameState,
     };
     return gameCtx;
   }
 
   play() {
-    this.gameState = this.GAME_STATES.PLAYING;
+    this.gameState.prev = this.gameState.curr;
+    this.gameState.curr = this.GAME_STATES.PLAYING;
   }
 
-  pause() {
-    this.gameState = this.GAME_STATES.PAUSED;
+  edit() {
+    this.gameState.prev = this.gameState.curr;
+    this.gameState.curr = this.GAME_STATES.EDITING;
   }
 
   reset() {
@@ -64,14 +71,17 @@ export default class Game {
     };
     this._nActiveSounds = 0;
     this._nActiveSoundsLock = Promise.resolve();
+    this.gameState.prev = this.gameState.curr;
   }
 
   openMenu() {
-    this.gameState = this.GAME_STATES.MENU;
+    this.gameState.prev = this.gameState.curr;
+    this.gameState.curr = this.GAME_STATES.MENU;
   }
 
   openSettings() {
-    this.gameState = this.GAME_STATES.SETTINGS;
+    this.gameState.prev = this.gameState.curr;
+    this.gameState.curr = this.GAME_STATES.SETTINGS;
   }
 
   async _incrementActiveSounds() {
@@ -122,7 +132,7 @@ export default class Game {
 
   _update(dt) {
     // Update the game state based on the elapsed delta time (dt)
-    if (this.gameState === this.GAME_STATES.PLAYING) {
+    if (this.gameState.curr === this.GAME_STATES.PLAYING) {
       this.pendulums.forEach((pendulum) => {
         pendulum.update(dt);
       });
@@ -144,8 +154,6 @@ export default class Game {
     let then = performance.now();
     const interval = 1000 / this.fpsCap;
     let delta = 0;
-
-    this.play();
 
     const updateAndRender = (now) => {
       requestAnimationFrame(updateAndRender);

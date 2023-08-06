@@ -1,15 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Harmony Motion Symphony</title>
-    <link rel="stylesheet" href="css/reset.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
+
 <body>
     <canvas id="canvas"></canvas>
-    <button type="button" id="start-button">START</button>
-    <script  src="../dist/bundle.js"></script>
+    <menu class="menu-overlay" id="menuOverlay">
+        <button type="menu" id="play-button">PLAY</button>
+        <button type="menu" id="resume-button">RESUME</button>
+        <button type="menu" id="reset-button">RESET</button>
+        <button type="menu" id="settings-button">SETTINGS</button>
+    </menu>
+    <div class="keys-hint-overlay" id="keysHintOverlay">
+        <div class="keys-hint" id="keysHint">
+            <p><strong>ESC</strong> toggle the menu</p>
+            <p><strong>SPACE</strong> toggle between editing and playing mode</p>
+        </div>
+    </div>
+    <div class="editing-overlay" id="editingOverlay">
+        <!-- Content for the editing overlay goes here -->
+        EDITING OVERLAY
+    </div>
+    <div class="playing-overlay" id="playingOverlay">
+        <!-- Content for the playing overlay goes here -->
+        PLAYING OVERLAY
+    </div>
+
+    <script src="../dist/bundle.js"></script>
 </body>
+
 </html>
