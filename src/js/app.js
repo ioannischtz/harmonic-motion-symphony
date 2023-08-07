@@ -201,6 +201,10 @@ function main() {
       radiusValue,
       oscillatorsParams,
     );
+    oscillatorsParams.length = 0;
+    // Update the oscillatorCountLabel to show the number of oscillators added
+    oscillatorCountLabel.textContent =
+      `Number of Oscillators: ${oscillatorsParams.length}`;
   }
 
   // Initial update to set the keys-hint
