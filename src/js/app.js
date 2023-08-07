@@ -16,20 +16,29 @@ function main() {
     dampingCoeff: 0.00005,
   };
   // Get the elements
+  //
+  const canvas = document.getElementById("canvas");
+
+  // menu buttons
   const newGameBtn = document.getElementById("new-game-button");
   const resumeBtn = document.getElementById("resume-button");
   const resetButton = document.getElementById("reset-button");
   const settingsButton = document.getElementById("settings-button");
-  const canvas = document.getElementById("canvas");
+
+  // overlays
   const menuOverlay = document.getElementById("menuOverlay");
   const editingOverlay = document.getElementById("editingOverlay");
   const playingOverlay = document.getElementById("playingOverlay");
   const keysHintOverlay = document.getElementById("keysHintOverlay");
-  const audioSourceGui = document.getElementById("audioSourceGui");
+
+  // add pendulum gui
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabContents = document.querySelectorAll(".tab-content");
   const weightInput = document.getElementById("weightInput");
   const radiusInput = document.getElementById("radiusInput");
   const coordX = document.getElementById("xCoordinateInput");
   const coordY = document.getElementById("yCoordinateInput");
+  const audioSourceGui = document.getElementById("audioSourceGui");
   const typeSelect = document.getElementById("typeSelect");
   const baseFrequencySelect = document.getElementById("baseFrequencySelect");
   const gainInput = document.getElementById("gainInput");
@@ -40,8 +49,6 @@ function main() {
   const detuneInput = document.getElementById("detuneInput");
   const addOscillatorButton = document.getElementById("addOscillatorButton");
   const oscillatorCountLabel = document.getElementById("oscillatorCountLabel");
-  const tabButtons = document.querySelectorAll(".tab-button");
-  const tabContents = document.querySelectorAll(".tab-content");
   const addPendulumBtn = document.getElementById("add-pendulum-button");
 
   menuOverlay.style.display = "flex";
@@ -98,15 +105,19 @@ function main() {
   function updateKeysHint(gameState, GAME_STATES) {
     const keysHint = document.getElementById("keysHint");
     keysHint.innerHTML = `
-    <p><kbd>Esc</kbd> ${gameState.curr === GAME_STATES.MENU ? "close" : "open"
-      } the menu</p>
-    <p><kbd>Space</kbd> switch to ${gameState.curr === GAME_STATES.EDITING ? "playing" : "editing"
-      } mode</p>
+    <p><kbd>Esc</kbd> ${
+      gameState.curr === GAME_STATES.MENU ? "close" : "open"
+    } the menu</p>
+    <p><kbd>Space</kbd> switch to ${
+      gameState.curr === GAME_STATES.EDITING ? "playing" : "editing"
+    } mode</p>
   `;
   }
 
   function handleKeyPress(event) {
     if (event.key === "Escape" || event.key == "Esc") {
+      // If the game just loaded, pressing `ESC` shouldn't have any effec
+      if (game.gameState.curr === game.gameState.prev) return;
       // Pressing `ESC` key will toggle the menu overlay
       if (game.gameState.curr === game.GAME_STATES.MENU) {
         menuOverlay.style.display = "none";
