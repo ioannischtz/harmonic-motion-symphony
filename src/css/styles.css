@@ -58,6 +58,68 @@ canvas {
   outline: none;
 }
 
+.settings-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.025);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  display: none; /* Initially hide the settings overlay */
+}
+
+.settings-overlay.active {
+  display: flex; /* Show the settings overlay when it has the 'active' class */
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-content label {
+  font-size: 24px;
+  color: var(--semantic-green);
+}
+
+.settings-content input {
+  font-size: 20px;
+  padding: 4px 8px;
+  border: 2px solid var(--semantic-green);
+  border-radius: 4px;
+}
+
+.overlay-title {
+  font-size: 48px;
+  font-weight: bold;
+  color: var(--semantic-green);
+  margin-bottom: 20px;
+}
+
+.settings-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.settings-buttons button {
+  font-size: 20px;
+  padding: 8px 16px;
+  background-color: var(--semantic-green);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 .editing-overlay,
 .playing-overlay,
 .keys-hint-overlay {

@@ -1,5 +1,5 @@
 import AudioSource from "./AudioSource";
-import { drawCircle, drawLine, mapRangeInverse } from "./utils";
+import { drawCircle, drawLine, mapRangeInverse } from "../utils";
 
 export default class Pendulum {
   constructor(gameCtx, coords, weight = 5, radius = 5, oscillatorsParams) {
@@ -96,7 +96,7 @@ export default class Pendulum {
     const alpha =
       -((this.gameCtx.simCoeffs.gAccel / this.length) * Math.sin(this.angle)) -
       (this.gameCtx.simCoeffs.dampingCoeff / this.weight) *
-      this._angularVelocity;
+        this._angularVelocity;
 
     // Update the angular velocity and angle
     this._angularVelocity += alpha * dt;

@@ -1,8 +1,12 @@
 import Pendulum from "./Pendulum";
-import { baseFrequencies } from "./utils";
+import GameEventEmitter from "./GameEventEmitter";
+import { baseFrequencies } from "../utils";
+import StateMachine from "./StateMachine";
 
 export default class Game {
   constructor(canvasParams, audioCtx, fpsCap, simCoeffs) {
+    console.info("Game constructor called");
+
     this.canvas = document.getElementById(canvasParams.canvasId);
     this.canvasCtx = this.canvas.getContext("2d");
     this.audioCtx = audioCtx;
@@ -11,16 +15,39 @@ export default class Game {
     this.simCoeffs = simCoeffs;
     this.fpsCap = fpsCap;
     this.pendulums = [];
+
+    this.eventEmitter = new GameEventEmitter();
+
+    this.GAME_STATES_WITH_HISTORY = {
+      MENU: "MENU",
+      PLAYING: "PLAYING",
+      EDITING: "EDITING",
+    };
+
     this.GAME_STATES = {
       MENU: "MENU",
       PLAYING: "PLAYING",
       EDITING: "EDITING",
       SETTINGS: "SETTINGS",
     };
-    this.gameState = {
-      curr: this.GAME_STATES.MENU,
-      prev: this.GAME_STATES.MENU,
+
+    this.initialState = this.GAME_STATES.MENU;
+
+    this.actions = {
+      newGame: this.newGame.bind(this),
+      play: this.play.bind(this),
+      edit: this.edit.bind(this),
+      openMenu: this.openMenu.bind(this),
+      openSettings: this.openSettings.bind(this),
+      closeSettings: this.closeSettings.bind(this),
+      reset: this.reset.bind(this),
     };
+
+    this.StateMachine = new StateMachine(
+      this.initialState,
+      this.GAME_STATES_WITH_HISTORY,
+      this.actions,
+    );
 
     // Set the origin-point to the top center of the canvas for simplicity
     this.originPoint = { x: this.canvas.width / 2, y: 100 };
@@ -37,6 +64,13 @@ export default class Game {
     this._loop();
   }
 
+  emitStateChangeEvent() {
+    this.eventEmitter.emit("gameStateChange", {
+      state: this.StateMachine.current,
+      stateHistory: this.StateMachine.history.buffer,
+    });
+  }
+
   getGameCtx() {
     // Game Context:
     const gameCtx = {
@@ -47,7 +81,10 @@ export default class Game {
       _nActiveSounds: this._nActiveSounds,
       incrActiveSoundsCounterCallback: this._incrementActiveSounds,
       decrActiveSoundsCounterCallback: this._decrementActiveSounds,
-      gameState: this.gameState,
+      StateObj: {
+        state: this.StateMachine.current,
+        stateHistory: this.StateMachine.history.buffer,
+      },
     };
     return gameCtx;
   }
@@ -85,13 +122,21 @@ export default class Game {
   }
 
   play() {
-    this.gameState.prev = this.gameState.curr;
-    this.gameState.curr = this.GAME_STATES.PLAYING;
+    // this.gameState.prev = this.gameState.curr;
+    // this.gameState.curr = this.GAME_STATES.PLAYING;
+    // this.setGameState(this.GAME_STATES.PLAYING);
+    this.StateMachine.transitionTo(this.GAME_STATES.PLAYING);
+    this.emitStateChangeEvent();
+    console.info("Enter Playing Mode");
   }
 
   edit() {
-    this.gameState.prev = this.gameState.curr;
-    this.gameState.curr = this.GAME_STATES.EDITING;
+    // this.gameState.prev = this.gameState.curr;
+    // this.gameState.curr = this.GAME_STATES.EDITING;
+    // this.setGameState(this.GAME_STATES.EDITING);
+    this.StateMachine.transitionTo(this.GAME_STATES.EDITING);
+    this.emitStateChangeEvent();
+    console.info("Enter Editing Mode");
   }
 
   reset() {
@@ -107,13 +152,26 @@ export default class Game {
   }
 
   openMenu() {
-    this.gameState.prev = this.gameState.curr;
-    this.gameState.curr = this.GAME_STATES.MENU;
+    // this.gameState.prev = this.gameState.curr;
+    // this.gameState.curr = this.GAME_STATES.MENU;
+    // this.setGameState(this.GAME_STATES.MENU);
+    this.StateMachine.transitionTo(this.GAME_STATES.MENU);
+    this.emitStateChangeEvent();
+    console.info("Open Menu");
   }
 
   openSettings() {
-    this.gameState.prev = this.gameState.curr;
-    this.gameState.curr = this.GAME_STATES.SETTINGS;
+    // this.gameState.prev = this.gameState.curr;
+    // this.gameState.curr = this.GAME_STATES.SETTINGS;
+    // this.setGameState(this.GAME_STATES.SETTINGS);
+    this.StateMachine.transitionTo(this.GAME_STATES.SETTINGS);
+    this.emitStateChangeEvent();
+    console.info("Open settings");
+  }
+
+  closeSettings() {
+    this.openMenu();
+    console.info("Close settings and return to main menu");
   }
 
   async _incrementActiveSounds() {
@@ -172,7 +230,7 @@ export default class Game {
 
   _update(dt) {
     // Update the game state based on the elapsed delta time (dt)
-    if (this.gameState.curr === this.GAME_STATES.PLAYING) {
+    if (this.StateMachine.current === this.GAME_STATES.PLAYING) {
       this.pendulums.forEach((pendulum) => {
         pendulum.update(dt);
       });

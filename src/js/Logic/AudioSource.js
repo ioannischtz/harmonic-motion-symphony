@@ -31,15 +31,13 @@ export default class AudioSource {
   playNote(durationInSecs) {
     console.info("AudioSource.playNote");
     console.info("AudioSource._isStopped", this._isStopped);
-    if (true) {
-      this._isStopped = false;
-      this.oscillators.forEach((osc) => {
-        // !! Maybe we will need to pass a specific time,
-        // for synchronization
-        const currentTime = this.gameCtx.audioCtx.currentTime;
-        console.info("currentTime = ", currentTime);
-        osc.playNote(currentTime, durationInSecs);
-      });
-    }
+    this._isStopped = false;
+    this.oscillators.forEach((osc) => {
+      // !! Maybe we will need to pass a specific time,
+      // for synchronization
+      const currentTime = this.gameCtx.audioCtx.currentTime;
+      console.info("currentTime = ", currentTime);
+      osc.playNote(currentTime, durationInSecs);
+    });
   }
 }
