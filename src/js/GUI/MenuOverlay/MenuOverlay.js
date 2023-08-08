@@ -17,7 +17,7 @@ export default class MenuOverlay {
     this.settingsButton = document.getElementById("settings-button");
 
     // SettingsOverlay Object
-    this.SettingsOverlay = new SettingsOverlay();
+    this.SettingsOverlay = new SettingsOverlay(this.gameInstance);
     this.SettingsOverlay.overlayElm.style.display = "none";
 
     this.resumeButton.style.display = "none";
