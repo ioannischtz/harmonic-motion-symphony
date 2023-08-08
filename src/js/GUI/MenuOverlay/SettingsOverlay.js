@@ -49,6 +49,8 @@ export default class SettingsOverlay {
       gAccel: this.gAccel,
       dampingCoeff: this.dampingCoeff,
     };
+    // Since the physics simulation rely on a fixed time step, we need to reset
+    this.gameInstance.reset();
   }
 
   resetValues() {

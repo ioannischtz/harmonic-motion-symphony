@@ -250,13 +250,14 @@ export default class Game {
 
   _loop() {
     let then = performance.now();
-    const interval = 1000 / this.fpsCap;
+    let interval = 1000 / this.fpsCap;
     let delta = 0;
 
     const updateAndRender = (now) => {
       requestAnimationFrame(updateAndRender);
 
       delta = now - then;
+      interval = 1000 / this.fpsCap;
 
       if (delta >= interval) {
         then = now - (delta % interval);
