@@ -169,7 +169,7 @@ export function drawCircle(ctx, pointCoords, radius, color, thickness) {
 }
 
 export function drawAnimatedGlowingCircle(
-  context,
+  ctx,
   pointCoords,
   radius,
   color,
@@ -192,7 +192,7 @@ export function drawAnimatedGlowingCircle(
     const currentGlowValue = animationProgress * maxGlowValue;
 
     drawCircleWithGlow(
-      context,
+      ctx,
       pointCoords,
       radius,
       color,
@@ -209,7 +209,7 @@ export function drawAnimatedGlowingCircle(
 }
 
 export function drawCircleWithGlow(
-  context,
+  ctx,
   pointCoords,
   radius,
   fillColor,
@@ -219,16 +219,67 @@ export function drawCircleWithGlow(
   const x = pointCoords.x;
   const y = pointCoords.y;
 
-  // context.save();
+  // ctx.save();
 
   // Set the glowing effect with the specified shadowBlur value
-  context.shadowBlur = glowValue;
-  context.shadowColor = glowColor;
+  ctx.shadowBlur = glowValue;
+  ctx.shadowColor = glowColor;
 
-  context.beginPath();
-  context.arc(x, y, radius, 0, Math.PI * 2);
-  context.fillStyle = fillColor;
-  context.fill();
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fillStyle = fillColor;
+  ctx.fill();
 
-  // context.restore();
+  // ctx.restore();
+}
+
+export function drawCeiling(ctx, length, startX, startY, color, lineWidth) {
+  const endX = startX + length;
+  const endY = startY;
+  const slantedLineCount = Math.floor(length / 20); // Adjust the divisor for the desired number of slanted lines
+  const slantedLineSpacing = length / (slantedLineCount + 1);
+  // const slantedLineLength = 10;
+  const slantedLineLength = slantedLineSpacing * Math.sqrt(2);
+  const slantedLineAngle = 60; // Angle of the slanted lines in degrees
+
+  drawLine(
+    ctx,
+    { x: startX, y: startY },
+    { x: endX, y: endY },
+    color,
+    lineWidth,
+  );
+  // Alternative style
+  // for (let i = 1; i <= slantedLineCount; i++) {
+  //   const slantedStartX = startX + i * slantedLineSpacing;
+  //   const slantedStartY = startY - i * (lineWidth * 2); // Adjust the value for proper slanting
+  //   drawLine(
+  //     ctx,
+  //     { x: slantedStartX, y: slantedStartY },
+  //     { x: slantedStartX, y: startY },
+  //     color,
+  //     lineWidth,
+  //   );
+  // }
+
+  for (let i = 1; i <= slantedLineCount; i++) {
+    const slantedStartX = startX + i * slantedLineSpacing;
+    const slantedStartY = startY;
+    const slantedEndX = slantedStartX +
+      slantedLineLength * Math.cos(degToRad(slantedLineAngle));
+    const slantedEndY = startY -
+      slantedLineLength * Math.sin(degToRad(slantedLineAngle));
+    drawLine(
+      ctx,
+      { x: slantedStartX, y: slantedStartY },
+      { x: slantedEndX, y: slantedEndY },
+      color,
+      lineWidth,
+    );
+  }
+}
+
+// Function to convert degrees to radians
+export function degToRad(degrees) {
+  return (degrees * Math.PI) / 180;
 }

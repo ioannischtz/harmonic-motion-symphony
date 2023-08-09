@@ -1,6 +1,6 @@
 import Pendulum from "./Pendulum";
 import GameEventEmitter from "./GameEventEmitter";
-import { baseFrequencies, drawLine } from "../utils";
+import { baseFrequencies, drawCeiling } from "../utils";
 import StateMachine from "./StateMachine";
 
 export default class Game {
@@ -219,10 +219,11 @@ export default class Game {
     this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw the ceiling line
-    drawLine(
+    drawCeiling(
       this.canvasCtx,
-      { x: 0, y: this.originPoint.y },
-      { x: this.canvas.width, y: this.originPoint.y },
+      400,
+      this.originPoint.x - 200,
+      this.originPoint.y,
       "black",
       1,
     );
