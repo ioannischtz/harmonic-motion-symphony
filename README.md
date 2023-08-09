@@ -27,6 +27,10 @@ npm run build
 , and then, open up `index.html` with a web browser of your choice. (The audio
 might have some glitches when a note finishes on the FireFox browser)
 
+Inspiration Credits:
+[Lucid Rhythms - "Space Pendulum"](https://www.youtube.com/watch?v=JhUcHtbDOWE)
+When I watched that video I knew I HAD to implement it.
+
 ## TODO
 
 - [x] Create a functional prototype
