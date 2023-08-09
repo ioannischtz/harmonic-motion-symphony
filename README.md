@@ -43,3 +43,5 @@ might have some glitches when a note finishes on the FireFox browser)
   - [ ] Drag a pendulum while the simulation is running
 - [x] Implement the `AudioSource` class: - host multiple oscillators, - add ADSR
       envelop - add detuning
+- [ ] Update the classes docs
+- [ ] Implement a glow halo effect for the pendulum weight, when it plays a note
