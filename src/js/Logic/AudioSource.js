@@ -15,6 +15,11 @@ export default class AudioSource {
   addOscillator(oscParams) {
     // Create a new oscillatorNode and add it
     // to the audioSource's oscillators array
+    if (this.oscillators.length > 0) {
+      oscParams.gain = oscParams.gain / (this.oscillators.length + 1);
+      this.oscillators.gain = this.oscillators.gain /
+        (this.oscillators.length + 1);
+    }
     const oscillator = new Oscillator(this.gameCtx, oscParams);
     this.oscillators.push(oscillator);
   }
