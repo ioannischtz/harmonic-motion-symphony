@@ -1,4 +1,9 @@
-import { baseFrequencies, oscillatorTypes } from "../../utils";
+import {
+  baseFrequencies,
+  findKeyByValue,
+  mapRangeInverseToList,
+  oscillatorTypes,
+} from "../../utils";
 
 export default class AddPendulumOverlay {
   constructor(gameInstance, overlayElements) {
@@ -40,6 +45,8 @@ export default class AddPendulumOverlay {
 
     this._populateBaseFreqOptions();
     this._populateOscTypeOptions();
+
+    this._updateBaseFreqBasedOnWeight();
     this._setupEventListeners();
   }
 
@@ -71,7 +78,12 @@ export default class AddPendulumOverlay {
     const weightValue = parseInt(this.weightInput.value);
     const radiusValue = parseInt(this.radiusInput.value);
     const coordXval = parseInt(this.xCoordinateInput.value);
-    const coordYval = parseInt(this.yCoordinateInput.value);
+    let coordYval = parseInt(this.yCoordinateInput.value);
+
+    if (coordYval < this.gameInstance.originPoint.y) {
+      coordYval = this.gameInstance.originPoint.y;
+    }
+
     this.gameInstance.addPendulum(
       { x: coordXval, y: coordYval },
       weightValue,
@@ -118,8 +130,32 @@ export default class AddPendulumOverlay {
     yCoordinateInput.value = offsetY;
   }
 
+  _updateBaseFreqBasedOnWeight() {
+    const baseFreq = mapRangeInverseToList(
+      this.weightVal,
+      10,
+      10000,
+      Object.values(baseFrequencies),
+    );
+
+    // const optionToSelect = findKeyByValue(baseFrequencies, baseFreq);
+    const optionToSelect = baseFreq.toString();
+
+    for (const option of this.baseFrequencySelect.options) {
+      if (option.value === optionToSelect) {
+        console.info("option.value === optionToSelect", option.value);
+        option.selected = true;
+        break; // Exit the loop after finding and selecting the desired option
+      }
+    }
+  }
+
+  _handleWeightInputChange(event) {
+    this.weightVal = event.target.valueAsNumber;
+    this._updateBaseFreqBasedOnWeight();
+  }
+
   _setupEventListeners() {
-    console.info(this);
     this.gameInstance.canvas.addEventListener(
       "click",
       this._setCoordsFromCanvasClick.bind(this),
@@ -131,6 +167,10 @@ export default class AddPendulumOverlay {
     this.addPendulumButton.addEventListener(
       "click",
       this.handleAddPendulumBtnClick.bind(this),
+    );
+    this.weightInput.addEventListener(
+      "input",
+      this._handleWeightInputChange.bind(this),
     );
   }
 }

@@ -57,7 +57,36 @@ export const baseFrequencies = {
   B4: 493.88,
 };
 
+export const baseNotes = [
+  "C",
+  "C#",
+  "Db",
+  "D",
+  "D#",
+  "Eb",
+  "E",
+  "F",
+  "F#",
+  "Gb",
+  "G",
+  "G#",
+  "Ab",
+  "A",
+  "A#",
+  "Bb",
+  "B",
+];
+
 export const oscillatorTypes = ["sine", "triangle", "square", "sawtooth"];
+
+export function findKeyByValue(obj, targetValue) {
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === targetValue) {
+      return key;
+    }
+  }
+  return null; // Return null if the value isn't found in the object
+}
 
 export function mapRangeInverse(
   value,
@@ -77,6 +106,30 @@ export function mapRange(value, inputMin, inputMax, outputMin, outputMax) {
     ((value - inputMin) * (outputMax - outputMin)) / (inputMax - inputMin) +
     outputMin
   );
+}
+
+export function mapRangeToList(value, rangeMin, rangeMax, list) {
+  if (value < rangeMin || value > rangeMax) {
+    throw new Error("Value is outside the specified range");
+  }
+
+  const rangeSize = rangeMax - rangeMin;
+  const valuePosition = (value - rangeMin) / rangeSize;
+  const index = Math.floor(valuePosition * (list.length - 1));
+
+  return list[index];
+}
+
+export function mapRangeInverseToList(value, rangeMin, rangeMax, list) {
+  if (value < rangeMin || value > rangeMax) {
+    throw new Error("Value is outside the specified range");
+  }
+
+  const rangeSize = rangeMax - rangeMin;
+  const valuePosition = (value - rangeMin) / rangeSize;
+  const index = Math.floor((1 - valuePosition) * (list.length - 1));
+
+  return list[index];
 }
 
 export function getRandomInt(max) {

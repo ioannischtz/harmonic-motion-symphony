@@ -11,7 +11,6 @@ export default class StateMachine {
   }
 
   transitionTo(newState) {
-    console.group("StateMachine transitionTo: ");
     console.info("newState = ", newState);
 
     if (
@@ -30,6 +29,5 @@ export default class StateMachine {
     console.info(
       `State history head:${this.history.head}, tail:${this.history.tail}`,
     );
-    console.groupEnd();
   }
 }

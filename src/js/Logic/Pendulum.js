@@ -1,9 +1,11 @@
 import AudioSource from "./AudioSource";
 import {
+  baseFrequencies,
   drawAnimatedGlowingCircle,
   drawCircle,
   drawLine,
   mapRangeInverse,
+  mapRangeInverseToList,
 } from "../utils";
 
 export default class Pendulum {
@@ -32,14 +34,19 @@ export default class Pendulum {
 
     this.checkCrossedMiddle = false;
 
-    oscillatorsParams = oscillatorsParams.map((oscParams) => ({
+    this.oscillatorsParams = oscillatorsParams.map((oscParams) => ({
       ...oscParams,
-      baseFreq: mapRangeInverse(this.weight, 10, 10000, 80, 800),
+      baseFreq: mapRangeInverseToList(
+        this.weight,
+        10,
+        10000,
+        Object.values(baseFrequencies),
+      ),
     }));
 
     // console.info(oscillatorsParams);
 
-    this.audioSource = new AudioSource(gameCtx, oscillatorsParams);
+    this.audioSource = new AudioSource(gameCtx, this.oscillatorsParams);
 
     // Constants for our Simple Harmonic Motion model
     // this.gAccel = 0.00015; // gravitational acceleration (m/s^2) default=9.81
@@ -117,10 +124,15 @@ export default class Pendulum {
     // I decided to implement a modified SHM model, that also accounts for damping and weight
     // Euler's method for numerical integration
     //
+    // Don't go over the `y` ceiling
+    if (this.coords.y < this.gameCtx.originPoint.y) {
+      this.coords.y = this.gameCtx.originPoint.y;
+    }
+
     const alpha =
       -((this.gameCtx.simCoeffs.gAccel / this.length) * Math.sin(this.angle)) -
       (this.gameCtx.simCoeffs.dampingCoeff / this.weight) *
-        this._angularVelocity;
+      this._angularVelocity;
 
     // Update the angular velocity and angle
     this._angularVelocity += alpha * dt;

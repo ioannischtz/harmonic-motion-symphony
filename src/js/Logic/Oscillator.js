@@ -47,6 +47,8 @@ export default class Oscillator {
 
       this.oscillatorNode.type = this.type;
 
+      console.info("Playnote baseFreq: ", this.baseFreq);
+
       this.oscillatorNode.frequency.setValueAtTime(this.baseFreq, currentTime);
       this.oscillatorNode.detune.setValueAtTime(this.detune, currentTime);
 

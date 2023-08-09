@@ -1,6 +1,6 @@
 import Pendulum from "./Pendulum";
 import GameEventEmitter from "./GameEventEmitter";
-import { baseFrequencies } from "../utils";
+import { baseFrequencies, drawLine } from "../utils";
 import StateMachine from "./StateMachine";
 
 export default class Game {
@@ -123,18 +123,12 @@ export default class Game {
   }
 
   play() {
-    // this.gameState.prev = this.gameState.curr;
-    // this.gameState.curr = this.GAME_STATES.PLAYING;
-    // this.setGameState(this.GAME_STATES.PLAYING);
     this.StateMachine.transitionTo(this.GAME_STATES.PLAYING);
     this.emitStateChangeEvent();
     console.info("Enter Playing Mode");
   }
 
   edit() {
-    // this.gameState.prev = this.gameState.curr;
-    // this.gameState.curr = this.GAME_STATES.EDITING;
-    // this.setGameState(this.GAME_STATES.EDITING);
     this.StateMachine.transitionTo(this.GAME_STATES.EDITING);
     this.emitStateChangeEvent();
     console.info("Enter Editing Mode");
@@ -153,18 +147,12 @@ export default class Game {
   }
 
   openMenu() {
-    // this.gameState.prev = this.gameState.curr;
-    // this.gameState.curr = this.GAME_STATES.MENU;
-    // this.setGameState(this.GAME_STATES.MENU);
     this.StateMachine.transitionTo(this.GAME_STATES.MENU);
     this.emitStateChangeEvent();
     console.info("Open Menu");
   }
 
   openSettings() {
-    // this.gameState.prev = this.gameState.curr;
-    // this.gameState.curr = this.GAME_STATES.SETTINGS;
-    // this.setGameState(this.GAME_STATES.SETTINGS);
     this.StateMachine.transitionTo(this.GAME_STATES.SETTINGS);
     this.emitStateChangeEvent();
     console.info("Open settings");
@@ -193,19 +181,7 @@ export default class Game {
     this._nActiveSoundsLock = Promise.resolve(); // Release the lock
   }
 
-  _setupEventListeners() {
-    // Add event listeners for user interactions
-    //
-    // Implement logic to handle pendulum selection:
-    //   it should open up a side menu with settings for the pendulum's parameters
-    //
-    // Implement logic to handle pendulum dragging with mouse (limit movement to the pendulums circular motion path)
-    //
-    // Implement logic to handle menu: pressing the `ESC` key should open the game menu:
-    //   `RESUME` or `PLAY`
-    //   `SETTINGS` (for the game's parameters, maybe for the physics as well? like the dampingCoeff?, also frame-rate cap)
-    //   `RESET`
-  }
+  _setupEventListeners() { }
 
   addPendulum(coords, weight, radius, oscillatorsParams) {
     // Game Context:
@@ -241,6 +217,15 @@ export default class Game {
   _render() {
     // Clear the canvas and draw the pendulums
     this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Draw the ceiling line
+    drawLine(
+      this.canvasCtx,
+      { x: 0, y: this.originPoint.y },
+      { x: this.canvas.width, y: this.originPoint.y },
+      "black",
+      1,
+    );
 
     this.pendulums.forEach((pendulum) => {
       // Draw the pendulum on the canvas
