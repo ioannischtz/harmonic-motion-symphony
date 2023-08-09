@@ -1,5 +1,10 @@
 import AudioSource from "./AudioSource";
-import { drawCircle, drawLine, mapRangeInverse } from "../utils";
+import {
+  drawAnimatedGlowingCircle,
+  drawCircle,
+  drawLine,
+  mapRangeInverse,
+} from "../utils";
 
 export default class Pendulum {
   constructor(gameCtx, coords, weight = 5, radius = 5, oscillatorsParams) {
@@ -15,6 +20,8 @@ export default class Pendulum {
       document.documentElement,
     ).getPropertyValue("--accent");
 
+    this.glowColor = "red";
+
     // Use setters to apply validation for weight and radius
     this.weight = weight;
     this.radius = radius;
@@ -22,6 +29,8 @@ export default class Pendulum {
     this.length = this.calcLength();
     this.angle = this.calcInitAngle();
     this._angularVelocity = 0;
+
+    this.checkCrossedMiddle = false;
 
     oscillatorsParams = oscillatorsParams.map((oscParams) => ({
       ...oscParams,
@@ -35,6 +44,8 @@ export default class Pendulum {
     // Constants for our Simple Harmonic Motion model
     // this.gAccel = 0.00015; // gravitational acceleration (m/s^2) default=9.81
     // this.dampingCoeff = 0.00005;
+
+    this._setupEventListeners();
   }
 
   // Setter for the 'weight' property
@@ -88,6 +99,19 @@ export default class Pendulum {
     return Math.atan2(dy, dx) + Math.PI / 2;
   }
 
+  _setupEventListeners() {
+    // this.gameCtx.eventEmitter.on("crossedMiddle", () => {
+    //   drawAnimatedGlowingCircle(
+    //     this.gameCtx.canvasCtx,
+    //     { x: this.coords.x, y: this.coords.y },
+    //     this.radius,
+    //     "blue",
+    //     "red",
+    //     1000,
+    //   );
+    // });
+  }
+
   update(dt) {
     // Implement the physics here to update the pendulum's angle and position
     // I decided to implement a modified SHM model, that also accounts for damping and weight
@@ -108,7 +132,7 @@ export default class Pendulum {
     this.coords.y = this.gameCtx.originPoint.y +
       this.length * Math.cos(this.angle); // Invert the y-coordinate
 
-    const checkCrossedMiddle = (this._prevX > this.gameCtx.originPoint.x &&
+    this.checkCrossedMiddle = (this._prevX > this.gameCtx.originPoint.x &&
       this.coords.x <= this.gameCtx.originPoint.x) ||
       (this._prevX < this.gameCtx.originPoint.x &&
         this.coords.x >= this.gameCtx.originPoint.x);
@@ -117,10 +141,19 @@ export default class Pendulum {
     this._prevX = this.coords.x;
 
     // Check if the pendulum's weight crosses the x position of the originPoint
-    if (checkCrossedMiddle) {
+    if (this.checkCrossedMiddle) {
       console.info("crossed middle");
       console.info("_nActiveSounds", this.gameCtx._nActiveSounds);
       this.audioSource.playNote(0.65); // Trigger the audio
+      // this.gameCtx.eventEmitter.emit("crossedMiddle");
+      // drawAnimatedGlowingCircle(
+      //   this.gameCtx.canvasCtx,
+      //   { x: this.coords.x, y: this.coords.y },
+      //   this.radius,
+      //   "blue",
+      //   "red",
+      //   3000,
+      // );
     }
   }
 

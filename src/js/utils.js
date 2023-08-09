@@ -114,3 +114,68 @@ export function drawCircle(ctx, pointCoords, radius, color, thickness) {
   ctx.lineWidth = thickness;
   ctx.stroke();
 }
+
+export function drawAnimatedGlowingCircle(
+  context,
+  pointCoords,
+  radius,
+  color,
+  glowColor,
+  animationDuration,
+) {
+  let animationStartTime;
+  const maxGlowValue = 20; // Maximum shadow blur value for glowing effect
+
+  function startGlowAnimation() {
+    animationStartTime = performance.now();
+    requestAnimationFrame((timestamp) =>
+      updateGlowAnimation(timestamp, pointCoords)
+    );
+  }
+
+  function updateGlowAnimation(timestamp, pointCoords) {
+    const elapsedTime = timestamp - animationStartTime;
+    const animationProgress = Math.min(elapsedTime / animationDuration, 1); // Ensure it's between 0 and 1
+    const currentGlowValue = animationProgress * maxGlowValue;
+
+    drawCircleWithGlow(
+      context,
+      pointCoords,
+      radius,
+      color,
+      glowColor,
+      currentGlowValue,
+    );
+
+    if (animationProgress < 1) {
+      requestAnimationFrame(updateGlowAnimation);
+    }
+  }
+
+  startGlowAnimation();
+}
+
+export function drawCircleWithGlow(
+  context,
+  pointCoords,
+  radius,
+  fillColor,
+  glowColor,
+  glowValue,
+) {
+  const x = pointCoords.x;
+  const y = pointCoords.y;
+
+  // context.save();
+
+  // Set the glowing effect with the specified shadowBlur value
+  context.shadowBlur = glowValue;
+  context.shadowColor = glowColor;
+
+  context.beginPath();
+  context.arc(x, y, radius, 0, Math.PI * 2);
+  context.fillStyle = fillColor;
+  context.fill();
+
+  // context.restore();
+}

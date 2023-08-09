@@ -85,6 +85,7 @@ export default class Game {
         state: this.StateMachine.current,
         stateHistory: this.StateMachine.history.buffer,
       },
+      eventEmitter: this.eventEmitter,
     };
     return gameCtx;
   }
@@ -270,6 +271,4 @@ export default class Game {
 
     requestAnimationFrame(updateAndRender);
   }
-
-  // Implement other methods for handling user interactions, pendulum selection, etc.
 }
