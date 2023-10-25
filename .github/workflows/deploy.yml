@@ -42,7 +42,7 @@ jobs:
       - name: Copy src/index.html to dist
         run: cp ./src/index.html dist/
       - name: Copy css to dist
-        run: cp -a /src/css/. /dist/css/
+        run: cp -a ./src/css/. dist/css/
       - name: Copy index.html as 404.html
         run: cp ./dist/index.html ./dist/404.html
       - name: Setup Pages
