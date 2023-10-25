@@ -39,10 +39,12 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build && cp ./dist/index.html ./dist/404.html
+      - name: Copy index.html to dist
+        run: cp index.html dist/
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
           # Upload dist repository
           path: "./dist"
